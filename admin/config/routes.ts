@@ -1,88 +1,25 @@
-﻿/**
- * @name umi 的路由配置
- * @description 只支持 path,component,routes,redirect,wrappers,title 的配置
- * @param path  path 只支持两种占位符配置，第一种是动态参数 :id 的形式，第二种是 * 通配符，通配符只能出现路由字符串的最后。
- * @param component 配置 location 和 path 匹配后用于渲染的 React 组件路径。可以是绝对路径，也可以是相对路径，如果是相对路径，会从 src/pages 开始找起。
- * @param routes 配置子路由，通常在需要为多个路径增加 layout 组件时使用。
- * @param redirect 配置路由跳转
- * @param wrappers 配置路由组件的包装组件，通过包装组件可以为当前的路由组件组合进更多的功能。 比如，可以用于路由级别的权限校验
- * @doc https://umijs.org/docs/guides/routes
- */
-
 export default [
   {
     path: '/user',
     layout: false,
-    routes: [
-      {
-        name: 'login',
-        path: '/user/login',
-        component: './User/Login',
-      },
-    ],
+    routes: [{ name: '登录', path: '/user/login', component: './User/Login' }],
   },
-  {
-    path: '/welcome',
-    name: 'welcome',
-    icon: 'smile',
-    component: './Welcome',
-  },
+  { path: '/welcome', name: '欢迎', icon: 'smile', component: './Welcome' },
   {
     path: '/admin',
-    name: 'admin',
+    name: '管理页',
     icon: 'crown',
     access: 'canAdmin',
     routes: [
-      {
-        path: '/admin/sub-page',
-        name: 'sub-page',
-        icon: 'smile',
-        component: './Welcome',
-      },
+      { path: '/admin/sub-page', name: '二级管理页', icon: 'smile', component: './Welcome' },
     ],
   },
-  {
-    name: 'list.table-list',
-    icon: 'table',
-    path: '/list',
-    component: './TableList',
-  },
-  {
-    name: 'list.adminer',
-    icon: 'table',
-    path: '/adminer',
-    component: './Adminer',
-  },
-  {
-    name: 'list.project',
-    icon: 'table',
-    path: '/project',
-    component: './Project',
-  },
-  {
-    name: 'list.activity',
-    icon: 'table',
-    path: '/activity',
-    component: './Activity',
-  },
-  {
-    name: 'list.prize',
-    icon: 'table',
-    path: '/prize',
-    component: './Prize',
-  },
-  {
-    name: 'list.lucker',
-    icon: 'table',
-    path: '/lucker',
-    component: './Lucker',
-  },
-  {
-    path: '/',
-    redirect: '/welcome',
-  },
-  {
-    path: '*',
-    component: './404',
-  },
+  { name: '查询表格', icon: 'table', path: '/list', component: './TableList' },
+  { icon: 'table', path: '/adminer', component: './Adminer' },
+  { icon: 'table', path: '/project', component: './Project' },
+  { icon: 'table', path: '/activity', component: './Activity' },
+  { icon: 'table', path: '/prize', component: './Prize' },
+  { icon: 'table', path: '/lucker', component: './Lucker' },
+  { path: '/', redirect: '/welcome' },
+  { path: '*', component: './404' },
 ];

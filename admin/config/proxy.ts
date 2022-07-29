@@ -11,10 +11,10 @@
  */
 export default {
   dev: {
-    // localhost:8000/api/** -> https://preview.pro.ant.design/api/**
-    '/api/': {
+    // localhost:8000/v1/api/** -> https://luck.catli.net/v1/api/**
+    '/v1/api/': {
       // 要代理的地址
-      target: 'https://preview.pro.ant.design',
+      target: 'https://luck.catli.net',
       // 配置了这个可以从 http 代理到 https
       // 依赖 origin 的功能可能需要这个，比如 cookie
       changeOrigin: true,
@@ -25,15 +25,15 @@ export default {
    * @doc https://github.com/chimurai/http-proxy-middleware
    */
   test: {
-    '/api/': {
-      target: 'https://proapi.azurewebsites.net',
+    '/v1/api/': {
+      target: 'https://luck.catli.net',
       changeOrigin: true,
       pathRewrite: { '^': '' },
     },
   },
   pre: {
-    '/api/': {
-      target: 'your pre url',
+    '/v1/api/': {
+      target: 'https://luck.catli.net',
       changeOrigin: true,
       pathRewrite: { '^': '' },
     },
