@@ -54,7 +54,7 @@ const Login: React.FC = () => {
   };
 
   const captchaParams: CaptchaReq = {
-    height: 60,
+    height: 40,
     width: 150,
     BgColor: {
       R: 254,
