@@ -9,3 +9,5 @@ git push origin main
 #git@e.coding.net:licat/luck_draw/luck_draw-ui.git
 git push origin-t main
 
+echo "git push 已完成"
+
