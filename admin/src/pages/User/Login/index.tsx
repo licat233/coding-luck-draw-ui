@@ -70,12 +70,17 @@ const Login: React.FC = () => {
       const result = await mathCaptcha(captchaParams);
       setCaptcha((result as API.BaseResp).data as CaptchaInfo);
     } catch (error) {
+      // notification.error({
+      //   message: '获取验证码失败！',
+      //   description: (error as any).info.errorMessage,
+      //   placement: 'bottomRight',
+      // });
       message.error('获取验证码失败！');
     }
   };
 
   useEffect(() => {
-    if (!captcha.base64_image) {
+    if (captcha.base64_image === "") {
       getCaptchaImage();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

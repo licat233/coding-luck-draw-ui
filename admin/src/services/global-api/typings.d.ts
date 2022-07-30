@@ -7,7 +7,7 @@ declare namespace API {
     trace?: string
   }
   type JwtToken = {
-    access_token: string
-    access_expire: number
+    token: string
+    expire: number
   }
 }
