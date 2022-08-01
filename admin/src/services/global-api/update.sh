@@ -12,27 +12,28 @@ curl -# -O --insecure https://luck.catli.net/v1/api/luckdraw/static/luckdrawComp
 echo "luckdrawComponents.ts下载完成"
 
 #更新function方法文件
-curl -# -o admin.txt --insecure https://luck.catli.net/v1/api/admin/static/admin.ts
+mkdir -p txt
+curl -# -o txt/admin.txt --insecure https://luck.catli.net/v1/api/admin/static/admin.ts
 echo "admin.ts下载完成"
-curl -# -o captcha.txt --insecure https://luck.catli.net/v1/api/captcha/static/captcha.ts
+curl -# -o txt/captcha.txt --insecure https://luck.catli.net/v1/api/captcha/static/captcha.ts
 echo "captcha.ts下载完成"
-curl -# -o luckdraw.txt --insecure https://luck.catli.net/v1/api/luckdraw/static/luckdraw.ts
+curl -# -o txt/luckdraw.txt --insecure https://luck.catli.net/v1/api/luckdraw/static/luckdraw.ts
 echo "luckdraw.ts下载完成"
 
 #创建*-custom.ts文件
 rm -f ./admin-custom.ts
 echo 'import { webapi } from "./webapi"' >admin-custom.ts
-cat admin.txt >>admin-custom.ts
+cat txt/admin.txt >>admin-custom.ts
 echo "update admin-custom successfully"
 
 rm -f ./captcha-custom.ts
 echo 'import { webapi } from "./webapi"' >captcha-custom.ts
-cat captcha.txt >>captcha-custom.ts
+cat txt/captcha.txt >>captcha-custom.ts
 echo "update captcha-custom successfully"
 
 rm -f ./luckdraw-custom.ts
 echo 'import { webapi } from "./webapi"' >luckdraw-custom.ts
-cat luckdraw.txt >>luckdraw-custom.ts
+cat txt/luckdraw.txt >>luckdraw-custom.ts
 echo "update luckdraw-custom successfully"
 
 #需要更新的 RESTful 方法: list info add edit del
@@ -70,16 +71,15 @@ echo "admin-custom.ts Function name changed successfully"
 #给所有的请求方法，加上options入参
 ALL_FILES=("admin-custom.ts" "captcha-custom.ts" "luckdraw-custom.ts")
 for filename in "${ALL_FILES[@]}"; do
-  filename="admin-custom.ts"
   STR1=") {"
   NEWSTR1=", options?: { [key: string]: any }) {"
-  sed -i "" "s/$STR1/$NEWSTR1/g" $filename
+  sed -i "" "s/$STR1/$NEWSTR1/" $filename
 
   STR2="(, options?:"
+  STR2=$(echo $STR2 | sed -e 's/[]\/$*.^[]/\\&/g')
   NEWSTR2="(options?:"
-  sed -i "" "s/$STR2/$NEWSTR2/g" $filename
+  sed -i "" "s/$STR2/$NEWSTR2/" $filename
 
-  filename="admin-custom.ts"
   STR3=")"
   NEWSTR3=", options)"
   for line in $(sed -n '/return webapi./=' $filename); do
