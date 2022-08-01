@@ -1,6 +1,5 @@
 import * as components from "./luckdrawComponents"
 export * from "./luckdrawComponents"
-import { webapi } from "./webapi"
 
 /**
  * @description "展现抽奖页面"

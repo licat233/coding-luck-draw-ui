@@ -1,6 +1,6 @@
 import { request } from '@umijs/max';
 
-const baseRequest = function <Type>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, body?: any, options?: Record<string, any>): Promise<unknown> {
+const baseRequest = async function <Type>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, body?: any, options?: { [key: string]: any }) {
   return request<Type>(url, {
     method: method,
     data: body,
@@ -9,16 +9,16 @@ const baseRequest = function <Type>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', u
 }
 
 export const webapi = {
-  get: function <Type>(url: string, body?: any, options?: Record<string, any>): Promise<unknown> {
+  get: async function <Type>(url: string, body?: any, options?: { [key: string]: any }) {
     return baseRequest<Type>('GET', url, body, options)
   },
-  post: function <Type>(url: string, body?: any, options?: Record<string, any>): Promise<unknown> {
+  post: async function <Type>(url: string, body?: any, options?: { [key: string]: any }) {
     return baseRequest<Type>('POST', url, body, options)
   },
-  put: function <Type>(url: string, body?: any, options?: Record<string, any>): Promise<unknown> {
+  put: async function <Type>(url: string, body?: any, options?: { [key: string]: any }) {
     return baseRequest<Type>('PUT', url, body, options)
   },
-  delete: function <Type>(url: string, body?: any, options?: Record<string, any>): Promise<unknown> {
+  delete: async function <Type>(url: string, body?: any, options?: { [key: string]: any }) {
     return baseRequest<Type>('PUT', url, body, options)
   },
   request: baseRequest,
