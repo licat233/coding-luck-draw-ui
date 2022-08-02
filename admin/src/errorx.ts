@@ -176,6 +176,7 @@ function showError(errorMessage: string | undefined, showType: ErrorShowType | u
       message.error(errorMessage);
       break;
     case ErrorShowType.NOTIFICATION:
+      // 分情况，如果是dev模式，则可显示traceMessage
       notification.open({
         description: traceMessage,
         message: errorMessage,

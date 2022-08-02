@@ -1,9 +1,9 @@
 import Footer from '@/components/Footer';
-import { login, loginByEmail } from '@/services/global-api/admin';
+import { login, loginByEmail } from '@/services/global-api/admin-custom';
 import { LoginReq, LoginByEmailReq } from '@/services/global-api/adminComponents';
-import { CaptchaInfo,CaptchaReq } from '@/services/global-api/captchaComponents';
-import { mathCaptcha } from '@/services/global-api/captcha';
-import { getFakeCaptcha } from '@/services/ant-design-pro/login';
+import { CaptchaInfo, CaptchaReq } from '@/services/global-api/captchaComponents';
+import { mathCaptcha } from '@/services/global-api/captcha-custom';
+import { emailCaptcha } from '@/services/global-api/captcha-custom';
 import {
   AlipayCircleOutlined,
   LockOutlined,
@@ -20,9 +20,10 @@ import {
   ProFormText,
 } from '@ant-design/pro-components';
 import { history, useModel } from '@umijs/max';
-import { Alert, message, Tabs, Input } from 'antd';
+import { Alert, message, Tabs, Input, Form } from 'antd';
 import React, { useState, useEffect } from 'react';
 import styles from './index.less';
+import { useForm } from 'antd/lib/form/Form';
 
 const LoginMessage: React.FC<{
   content: string;
@@ -44,6 +45,7 @@ const Login: React.FC = () => {
   const [type, setType] = useState<string>('account');
   const { initialState, setInitialState } = useModel('@@initialState');
   const [captcha, setCaptcha] = useState<CaptchaInfo>({ captcha_id: "", base64_image: "" });
+  const [form] = useForm()
 
   const fetchUserInfo = async () => {
     const userInfo = await initialState?.fetchUserInfo?.();
@@ -65,7 +67,7 @@ const Login: React.FC = () => {
   };
 
   const getCaptchaImage = async () => {
-    if (userLoginState.status) return;
+    if (userLoginState.status || type !== "account") return;
     try {
       const result = await mathCaptcha(captchaParams);
       setCaptcha((result as API.BaseResp).data as CaptchaInfo);
@@ -125,6 +127,7 @@ const Login: React.FC = () => {
     <div className={styles.container}>
       <div className={styles.content}>
         <LoginForm
+          form={form}
           logo={<img alt="logo" src="/logo.svg" />}
           title="Ant Design"
           subTitle={'Ant Design 是西湖区最具影响力的 Web 设计规范'}
@@ -140,12 +143,12 @@ const Login: React.FC = () => {
             <WeiboCircleOutlined key="WeiboCircleOutlined" className={styles.icon} />,
           ]}
           onFinish={async (values) => {
-            await handleSubmit({...values, captcha_id: captcha.captcha_id});
+            await handleSubmit({ ...values, captcha_id: captcha.captcha_id });
           }}
         >
           <Tabs activeKey={type} onChange={setType}>
             <Tabs.TabPane key="account" tab={'账户密码登录'} />
-            <Tabs.TabPane key="mobile" tab={'手机号登录'} />
+            <Tabs.TabPane key="email" tab={'邮箱登录'} />
           </Tabs>
           {status === 'error' && loginType === 'account' && (
             <LoginMessage content={'错误的用户名和密码'} />
@@ -247,23 +250,29 @@ const Login: React.FC = () => {
 
                   return '获取验证码';
                 }}
-                name="captcha"
+                name="solution"
                 rules={[
                   {
                     required: true,
                     message: '验证码是必填项！',
                   },
                 ]}
-                onGetCaptcha={async (phone) => {
-                  const result = await getFakeCaptcha({
-                    phone,
+                onGetCaptcha={async () => {
+                  console.log(form)
+                  const email = form.getFieldValue("email")
+                  if (!email) {
+                    message.warn("请输入登录邮箱")
+                    return
+                  }
+                  const result = await emailCaptcha({
+                    email
                   });
 
-                  if (result === false) {
+                  if (!result.success) {
                     return;
                   }
 
-                  message.success('获取验证码成功！验证码为：1234');
+                  message.success(`验证码已发送到邮箱:${email}`)
                 }}
               />
             </>

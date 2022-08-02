@@ -1,6 +1,6 @@
 # !/bin/bash
 
-#给予shell文件执行权限：chmod +x update.sh
+#给予shell文件执行权限：chmod a+x update.sh
 #执行shell文件：./update.shell
 
 #更新Components.ts接口文件
