@@ -1,5 +1,9 @@
 import { request } from '@umijs/max';
 
+//skipErrorHandler: true
+
+
+//核心请求方法
 const baseRequest = async function <Type>(method: 'GET' | 'POST' | 'PUT' | 'DELETE', url: string, body?: any, options?: { [key: string]: any }) {
   return request<Type>(url, {
     method: method,

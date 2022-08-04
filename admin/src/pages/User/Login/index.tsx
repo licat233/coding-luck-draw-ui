@@ -1,16 +1,13 @@
 import Footer from '@/components/Footer';
 import { login, loginByEmail } from '@/services/global-api/admin-custom';
 import { LoginReq, LoginByEmailReq } from '@/services/global-api/adminComponents';
-import { CaptchaInfo, CaptchaReq } from '@/services/global-api/captchaComponents';
+import { CaptchaInfo, CaptchaReq, EmailCaptchaResp } from '@/services/global-api/captchaComponents';
 import { mathCaptcha } from '@/services/global-api/captcha-custom';
 import { emailCaptcha } from '@/services/global-api/captcha-custom';
 import {
-  AlipayCircleOutlined,
   LockOutlined,
   MailOutlined,
-  TaobaoCircleOutlined,
   UserOutlined,
-  WeiboCircleOutlined,
   SafetyCertificateOutlined,
 } from '@ant-design/icons';
 import {
@@ -20,7 +17,7 @@ import {
   ProFormText,
 } from '@ant-design/pro-components';
 import { history, useModel } from '@umijs/max';
-import { Alert, message, Tabs, Input, Form } from 'antd';
+import { Alert, message, Tabs, Input, Modal } from 'antd';
 import React, { useState, useEffect } from 'react';
 import styles from './index.less';
 import { useForm } from 'antd/lib/form/Form';
@@ -44,7 +41,8 @@ const Login: React.FC = () => {
   const [userLoginState, setUserLoginState] = useState<Record<string, string | boolean>>({ status: false, type: 'account' });
   const [type, setType] = useState<string>('account');
   const { initialState, setInitialState } = useModel('@@initialState');
-  const [captcha, setCaptcha] = useState<CaptchaInfo>({ captcha_id: "", base64_image: "" });
+  const [imgCaptcha, setImgCaptcha] = useState<CaptchaInfo>({ captcha_id: "", base64_image: "" });
+  const [emailCaptchaInfo, setEmailCaptchaInfo] = useState<EmailCaptchaResp>({ captcha_id: "", expires_at: 0 });
   const [form] = useForm()
 
   const fetchUserInfo = async () => {
@@ -70,7 +68,7 @@ const Login: React.FC = () => {
     if (userLoginState.status || type !== "account") return;
     try {
       const result = await mathCaptcha(captchaParams);
-      setCaptcha((result as API.BaseResp).data as CaptchaInfo);
+      setImgCaptcha((result as API.BaseResp).data as CaptchaInfo);
     } catch (error) {
       // notification.error({
       //   message: '获取验证码失败！',
@@ -82,11 +80,11 @@ const Login: React.FC = () => {
   };
 
   useEffect(() => {
-    if (captcha.base64_image === "") {
+    if (imgCaptcha.base64_image === "" && type === "account") {
       getCaptchaImage();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [captcha]);
+  }, [imgCaptcha]);
 
   const handleSubmit = async (values: Record<string, any>) => {
     try {
@@ -103,6 +101,12 @@ const Login: React.FC = () => {
       const msg = resp as API.BaseResp;
 
       if (msg.success) {
+        //保存token
+        if (msg.data) {
+          const jwtToken = JSON.stringify(msg.data as API.JwtToken)
+          localStorage.setItem("jwtToken", jwtToken)
+        }
+
         // const defaultLoginSuccessMessage = '登录成功！';
         // message.success(defaultLoginSuccessMessage);
         await fetchUserInfo();
@@ -122,28 +126,38 @@ const Login: React.FC = () => {
     }
   };
 
+  const ForgetPasswordHandler = () => {
+    Modal.info({
+      title: '忘记密码？',
+      content: (
+        <div>
+          <p>请联系管理员</p>
+          <p>联系邮箱：licat233@gmail.com</p>
+        </div>
+      ),
+      onOk() { },
+    });
+  };
+
   const { status, type: loginType } = userLoginState;
   return (
     <div className={styles.container}>
       <div className={styles.content}>
         <LoginForm
           form={form}
-          logo={<img alt="logo" src="/logo.svg" />}
-          title="Ant Design"
-          subTitle={'Ant Design 是西湖区最具影响力的 Web 设计规范'}
+          logo={<img alt="logo" src="/logo.png" />}
+          title="Luck Draw"
+          subTitle={'Luck Draw 后台管理系统'}
           initialValues={{
             autoLogin: true,
             passport: 'licat',
             password: 'licat233',
+            email: "1697470538@qq.com",
           }}
-          actions={[
-            '其他登录方式 :',
-            <AlipayCircleOutlined key="AlipayCircleOutlined" className={styles.icon} />,
-            <TaobaoCircleOutlined key="TaobaoCircleOutlined" className={styles.icon} />,
-            <WeiboCircleOutlined key="WeiboCircleOutlined" className={styles.icon} />,
-          ]}
+          actions={[]}
           onFinish={async (values) => {
-            await handleSubmit({ ...values, captcha_id: captcha.captcha_id });
+            const captcha_id = type === "account" ? imgCaptcha.captcha_id : emailCaptchaInfo.captcha_id
+            await handleSubmit({ ...values, captcha_id });
           }}
         >
           <Tabs activeKey={type} onChange={setType}>
@@ -207,7 +221,7 @@ const Login: React.FC = () => {
                   />
                 </div>
                 <div className={styles.captchaimg} onClick={getCaptchaImage}>
-                  <img src={captcha?.base64_image || ''} />
+                  <img src={imgCaptcha?.base64_image || ''} />
                 </div>
               </Input.Group>
             </>
@@ -258,7 +272,6 @@ const Login: React.FC = () => {
                   },
                 ]}
                 onGetCaptcha={async () => {
-                  console.log(form)
                   const email = form.getFieldValue("email")
                   if (!email) {
                     message.warn("请输入登录邮箱")
@@ -269,9 +282,15 @@ const Login: React.FC = () => {
                   });
 
                   if (!result.success) {
+                    message.error(result.errorMessage)
                     return;
                   }
-
+                  try {
+                    setEmailCaptchaInfo(result.data as EmailCaptchaResp)
+                  } catch (error) {
+                    message.error("获取服务器返回数据异常")
+                    return
+                  }
                   message.success(`验证码已发送到邮箱:${email}`)
                 }}
               />
@@ -289,6 +308,7 @@ const Login: React.FC = () => {
               style={{
                 float: 'right',
               }}
+              onClick={ForgetPasswordHandler}
             >
               忘记密码 ?
             </a>

@@ -59,8 +59,9 @@ export interface ListReqParams {
 }
 
 export interface JwtToken {
-	token: string
-	expire: number
+	access_token: string
+	access_expire: number
+	refresh_after: number
 }
 
 export interface ActivityGetReq {

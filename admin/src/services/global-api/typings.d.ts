@@ -18,7 +18,8 @@ declare namespace API {
     host?: string // 【选填】方便后端故障排除：当前访问服务器的主机
   }
   type JwtToken = {
-    token: string
-    expire: number
+    access_token: string
+    access_expire: number
+    refresh_after: number
   }
 }

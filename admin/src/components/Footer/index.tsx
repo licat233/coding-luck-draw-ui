@@ -3,7 +3,7 @@ import { DefaultFooter } from '@ant-design/pro-components';
 import '@umijs/max';
 
 const Footer: React.FC = () => {
-  const defaultMessage = '蚂蚁集团体验技术部出品';
+  const defaultMessage = 'licat';
   const currentYear = new Date().getFullYear();
   return (
     <DefaultFooter
@@ -21,13 +21,13 @@ const Footer: React.FC = () => {
         {
           key: 'github',
           title: <GithubOutlined />,
-          href: 'https://github.com/ant-design/ant-design-pro',
+          href: 'https://github.com/licat233/luck_draw-ui',
           blankTarget: true,
         },
         {
-          key: 'Ant Design',
-          title: 'Ant Design',
-          href: 'https://ant.design',
+          key: 'go-zero',
+          title: 'go-zero',
+          href: 'https://go-zero.dev/',
           blankTarget: true,
         },
       ]}
