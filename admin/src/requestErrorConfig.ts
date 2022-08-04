@@ -91,14 +91,18 @@ export const errorConfig: RequestConfig = {
   // 请求拦截器
   requestInterceptors: [
     (options: RequestOptions) => {
+      // if (options) throw error;
       const token = localStorage.getItem('jwtToken');
       if (!token) return options;
       try {
         const jwt: API.JwtToken = JSON.parse(token);
+        if (jwt.access_expire < Date.now() / 1000) {
+          throw new Error("token is expired");
+        }
         if (!options.headers) {
           options.headers = {};
         }
-        options.headers['Authorization'] = jwt.token;
+        options.headers['Authorization'] = jwt.access_token;
       } catch (error) {
         localStorage.removeItem('jwtToken');
       }
