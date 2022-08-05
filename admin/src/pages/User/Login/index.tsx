@@ -65,22 +65,17 @@ const Login: React.FC = () => {
   };
 
   const getCaptchaImage = async () => {
-    if (userLoginState.status || type !== "account") return;
+    if (userLoginState.status) return;
     try {
       const result = await mathCaptcha(captchaParams);
       setImgCaptcha((result as API.BaseResp).data as CaptchaInfo);
     } catch (error) {
-      // notification.error({
-      //   message: '获取验证码失败！',
-      //   description: (error as any).info.errorMessage,
-      //   placement: 'bottomRight',
-      // });
       message.error('获取验证码失败！');
     }
   };
 
   useEffect(() => {
-    if (imgCaptcha.base64_image === "" && type === "account") {
+    if (imgCaptcha.base64_image === "") {
       getCaptchaImage();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -94,7 +89,13 @@ const Login: React.FC = () => {
         resp = await login({ ...values as LoginReq });
       } else if (type === 'email') {
         // 登录
-        resp = await loginByEmail({ ...values as LoginByEmailReq });
+        const req: LoginByEmailReq = {
+          email: values['email'],
+          captcha_id: values['captcha_id'],
+          solution: values['email_solution'],
+          autoLogin: values['autoLogin']
+        }
+        resp = await loginByEmail({ ...req });
       } else {
         throw new Error('Invalid login type');
       }
@@ -107,22 +108,15 @@ const Login: React.FC = () => {
           localStorage.setItem("jwtToken", jwtToken)
         }
 
-        // const defaultLoginSuccessMessage = '登录成功！';
-        // message.success(defaultLoginSuccessMessage);
         await fetchUserInfo();
         const urlParams = new URL(window.location.href).searchParams;
         history.push(urlParams.get('redirect') || '/');
         return;
       }
-
       // console.log(msg); // 如果失败去设置用户错误信息
-
       setUserLoginState({ status: msg.success, type: type });
     } catch (error) {
       getCaptchaImage();
-      // const defaultLoginFailureMessage = '登录失败，请重试！';
-      // console.log(error);
-      // message.error(defaultLoginFailureMessage);
     }
   };
 
@@ -220,7 +214,7 @@ const Login: React.FC = () => {
                     ]}
                   />
                 </div>
-                <div className={styles.captchaimg} onClick={getCaptchaImage}>
+                <div className={styles.captchaimg} key="account_captchaImag" onClick={getCaptchaImage}>
                   <img src={imgCaptcha?.base64_image || ''} />
                 </div>
               </Input.Group>
@@ -248,6 +242,33 @@ const Login: React.FC = () => {
                   },
                 ]}
               />
+              <Input.Group compact className={styles.captchagrounp}>
+                <div className={styles.captchainput}>
+                  <ProFormText
+                    name="solution"
+                    fieldProps={{
+                      size: 'large',
+                      prefix: <SafetyCertificateOutlined className={styles.prefixIcon} />,
+                    }}
+                    allowClear={true}
+                    width="xs"
+                    placeholder="验证码"
+                    rules={[
+                      {
+                        required: true,
+                        message: '请输入验证码！',
+                      },
+                      {
+                        pattern: /^-?\d{1,4}$/,
+                        message: '验证码格式错误！',
+                      },
+                    ]}
+                  />
+                </div>
+                <div className={styles.captchaimg} key="email_captchaImag" onClick={getCaptchaImage}>
+                  <img src={imgCaptcha?.base64_image || ''} />
+                </div>
+              </Input.Group>
               <ProFormCaptcha
                 fieldProps={{
                   size: 'large',
@@ -264,7 +285,8 @@ const Login: React.FC = () => {
 
                   return '获取验证码';
                 }}
-                name="solution"
+                allowClear={true}
+                name="email_solution"
                 rules={[
                   {
                     required: true,
@@ -273,12 +295,15 @@ const Login: React.FC = () => {
                 ]}
                 onGetCaptcha={async () => {
                   const email = form.getFieldValue("email")
+                  const solution = form.getFieldValue("solution")
                   if (!email) {
                     message.warn("请输入登录邮箱")
                     return
                   }
                   const result = await emailCaptcha({
-                    email
+                    email,
+                    captcha_id: imgCaptcha.captcha_id,
+                    solution
                   });
 
                   if (!result.success) {

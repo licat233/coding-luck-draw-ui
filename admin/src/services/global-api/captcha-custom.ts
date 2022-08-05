@@ -26,7 +26,7 @@ export function processCaptcha(req: components.ProcessCaptchaReq, options?: { [k
 }
 
 /**
- * @description "获取发送邮箱验证码"
+ * @description "向邮箱发送验证码"
  * @param req
  */
 export function emailCaptcha(req: components.EmailCaptchaReq, options?: { [key: string]: any }) {

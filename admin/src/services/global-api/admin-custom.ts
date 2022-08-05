@@ -19,6 +19,30 @@ export function loginByEmail(req: components.LoginByEmailReq, options?: { [key: 
 }
 
 /**
+ * @description "给登录邮箱发送验证码"
+ * @param req
+ */
+export function loginEmailCaptcha(req: components.LoginEmailCaptchaReq, options?: { [key: string]: any }) {
+	return webapi.post<components.BaseResp>("/v1/api/admin/loginEmailCaptcha", req, options)
+}
+
+/**
+ * @description "给注册邮箱发送验证码"
+ * @param req
+ */
+export function registerEmailCaptcha(req: components.RegisterEmailCaptchaReq, options?: { [key: string]: any }) {
+	return webapi.post<components.BaseResp>("/v1/api/admin/registerEmailCaptcha", req, options)
+}
+
+/**
+ * @description "给绑定邮箱发送验证码"
+ * @param req
+ */
+export function bindEmailCaptcha(req: components.BindEmailCaptchaReq, options?: { [key: string]: any }) {
+	return webapi.post<components.BaseResp>("/v1/api/admin/bindEmailCaptcha", req, options)
+}
+
+/**
  * @description "注销"
  */
 export function logout(options?: { [key: string]: any }) {
@@ -60,7 +84,7 @@ export function activityAdd(req: components.ActivityAddReq, options?: { [key: st
  * @description "编辑活动"
  * @param req
  */
-export function activityEdit(req: components.ActivityPutReq, options?: { [key: string]: any }) {
+export function activityPut(req: components.ActivityPutReq, options?: { [key: string]: any }) {
 	return webapi.put<components.BaseResp>("/v1/api/admin/activity", req, options)
 }
 
@@ -100,7 +124,7 @@ export function adminerAdd(req: components.AdminerAddReq, options?: { [key: stri
  * @description "编辑管理员"
  * @param req
  */
-export function adminerEdit(req: components.AdminerPutReq, options?: { [key: string]: any }) {
+export function adminerPut(req: components.AdminerPutReq, options?: { [key: string]: any }) {
 	return webapi.put<components.BaseResp>("/v1/api/admin/adminer", req, options)
 }
 
@@ -148,7 +172,7 @@ export function luckerAdd(req: components.LuckerAddReq, options?: { [key: string
  * @description "编辑抽奖者"
  * @param req
  */
-export function luckerEdit(req: components.LuckerPutReq, options?: { [key: string]: any }) {
+export function luckerPut(req: components.LuckerPutReq, options?: { [key: string]: any }) {
 	return webapi.put<components.BaseResp>("/v1/api/admin/lucker", req, options)
 }
 
@@ -188,7 +212,7 @@ export function prizeAdd(req: components.PrizeAddReq, options?: { [key: string]:
  * @description "编辑奖品"
  * @param req
  */
-export function prizeEdit(req: components.PrizePutReq, options?: { [key: string]: any }) {
+export function prizePut(req: components.PrizePutReq, options?: { [key: string]: any }) {
 	return webapi.put<components.BaseResp>("/v1/api/admin/prize", req, options)
 }
 
@@ -228,7 +252,7 @@ export function PrizesPoolAdd(req: components.PrizesPoolAddReq, options?: { [key
  * @description "编辑奖品池"
  * @param req
  */
-export function PrizesPoolEdit(req: components.PrizesPoolPutReq, options?: { [key: string]: any }) {
+export function PrizesPoolPut(req: components.PrizesPoolPutReq, options?: { [key: string]: any }) {
 	return webapi.put<components.BaseResp>("/v1/api/admin/PrizesPool", req, options)
 }
 
@@ -268,7 +292,7 @@ export function projectAdd(req: components.ProjectAddReq, options?: { [key: stri
  * @description "编辑项目"
  * @param req
  */
-export function projectEdit(req: components.ProjectPutReq, options?: { [key: string]: any }) {
+export function projectPut(req: components.ProjectPutReq, options?: { [key: string]: any }) {
 	return webapi.put<components.BaseResp>("/v1/api/admin/project", req, options)
 }
 
@@ -409,7 +433,7 @@ export function userAdd(req: components.UserAddReq, options?: { [key: string]: a
  * @description "编辑用户"
  * @param req
  */
-export function userEdit(req: components.UserPutReq, options?: { [key: string]: any }) {
+export function userPut(req: components.UserPutReq, options?: { [key: string]: any }) {
 	return webapi.put<components.BaseResp>("/v1/api/admin/user", req, options)
 }
 
@@ -449,7 +473,7 @@ export function usersPoolAdd(req: components.UsersPoolAddReq, options?: { [key: 
  * @description "编辑用户池"
  * @param req
  */
-export function usersPoolEdit(req: components.UsersPoolPutReq, options?: { [key: string]: any }) {
+export function usersPoolPut(req: components.UsersPoolPutReq, options?: { [key: string]: any }) {
 	return webapi.put<components.BaseResp>("/v1/api/admin/usersPool", req, options)
 }
 

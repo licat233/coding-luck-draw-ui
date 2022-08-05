@@ -158,7 +158,7 @@ export function verifyTokenExp(): string | null {
 
 function showError(errorMessage: string | undefined, showType: ErrorShowType | undefined, traceMessage: string | undefined = undefined) {
   if (traceMessage){
-    notification.warn({
+    notification.error({
       message: errorMessage,
       description: traceMessage,
       placement: 'bottomRight',
@@ -177,7 +177,7 @@ function showError(errorMessage: string | undefined, showType: ErrorShowType | u
       break;
     case ErrorShowType.NOTIFICATION:
       // 分情况，如果是dev模式，则可显示traceMessage
-      notification.open({
+      notification.warn({
         description: traceMessage,
         message: errorMessage,
       });

@@ -4,42 +4,50 @@
 #执行shell文件：./update.shell
 
 #更新Components.ts接口文件
-curl -# -O --insecure https://luck.catli.net/v1/api/admin/static/adminComponents.ts
-echo "adminComponents.ts下载完成"
-curl -# -O --insecure https://luck.catli.net/v1/api/captcha/static/captchaComponents.ts
-echo "captchaComponents.ts下载完成"
-curl -# -O --insecure https://luck.catli.net/v1/api/luckdraw/static/luckdrawComponents.ts
-echo "luckdrawComponents.ts下载完成"
+names=("admin" "captcha" "luckdraw")
+for name in ${names[@]}; do
+  filename="${name}Components.ts"
+  tsurl="https://luck.catli.net/v1/api/${name}/static/${filename}"
+  curl_code=$(curl -o new-${filename} --insecure -s -w %{http_code} $tsurl)
+  if [ $curl_code != "200" ]; then
+    echo "下载失败: $tsurl"
+    rm -f "new-${filename}"
+    exit
+  fi
+  echo "${filename} 下载完成"
+  rm -f $filename
+  mv "new-${filename}" $filename
+done
 
 #更新function方法文件
 mkdir -p txt
-curl -# -o txt/admin.txt --insecure https://luck.catli.net/v1/api/admin/static/admin.ts
-echo "admin.ts下载完成"
-curl -# -o txt/captcha.txt --insecure https://luck.catli.net/v1/api/captcha/static/captcha.ts
-echo "captcha.ts下载完成"
-curl -# -o txt/luckdraw.txt --insecure https://luck.catli.net/v1/api/luckdraw/static/luckdraw.ts
-echo "luckdraw.ts下载完成"
+for name in ${names[@]}; do
+  filename="${name}.ts"
+  tsurl="https://luck.catli.net/v1/api/${name}/static/${filename}"
+  curl_code=$(curl -o txt/new-${name}.txt --insecure -s -w %{http_code} $tsurl)
+  if [ $curl_code != "200" ]; then
+    echo "下载失败: $tsurl"
+    rm -f "txt/new-${filename}"
+    exit
+  fi
+  echo "${filename} 下载完成"
+  rm -f "txt/${name}.txt"
+  mv "txt/new-${name}.txt" "txt/${name}.txt"
+done
 
 #创建*-custom.ts文件
-rm -f ./admin-custom.ts
-echo 'import { webapi } from "./webapi"' >admin-custom.ts
-cat txt/admin.txt >>admin-custom.ts
-echo "update admin-custom successfully"
+for name in ${names[@]}; do
+  filename="${name}-custom.ts"
+  rm -f $filename
+  echo 'import { webapi } from "./webapi"' >$filename
+  cat "txt/${name}.txt" >>$filename
+  echo "update ${filename} successfully"
+done
 
-rm -f ./captcha-custom.ts
-echo 'import { webapi } from "./webapi"' >captcha-custom.ts
-cat txt/captcha.txt >>captcha-custom.ts
-echo "update captcha-custom successfully"
-
-rm -f ./luckdraw-custom.ts
-echo 'import { webapi } from "./webapi"' >luckdraw-custom.ts
-cat txt/luckdraw.txt >>luckdraw-custom.ts
-echo "update luckdraw-custom successfully"
-
-#需要更新的 RESTful 方法: list info add edit del
+#需要更新的 RESTful 方法: list info add put del
 #逻辑：查找指定方法名，获取其位置行数，查找下一行 admin/:name/ 后面的名字name，更改方法名为：name方法名
 FILENAME="admin-custom.ts"
-FUNC_ARR=("list" "info" "add" "edit" "del")
+FUNC_ARR=("list" "info" "add" "put" "del")
 for FUNC_NAME in ${FUNC_ARR[@]}; do
   N=7
   if [ $FUNC_NAME = "list" ]; then
@@ -53,7 +61,7 @@ for FUNC_NAME in ${FUNC_ARR[@]}; do
     let START_INDEX+=5
     LAST=$(($NEXT_LEN - $START_INDEX))
     END_INDEX=$(($LAST - $N))
-    NAME=${NEXT_STR: START_INDEX: END_INDEX}
+    NAME=${NEXT_STR:START_INDEX:END_INDEX}
     LINE_STR=$(sed -n $(expr ${line}p) $FILENAME)
     firstLetter=${FUNC_NAME:0:1}
     otherLetter=${FUNC_NAME:1}
