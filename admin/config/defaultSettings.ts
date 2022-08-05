@@ -15,9 +15,9 @@ const Settings: LayoutSettings & {
   fixedHeader: false,
   fixSiderbar: true,
   colorWeak: false,
-  title: 'Ant Design Pro',
+  title: 'Luck Draw',
   pwa: false,
-  logo: 'https://gw.alipayobjects.com/zos/rmsportal/KDpgvguMpGfqaHPjicRK.svg',
+  logo: 'https://img.alicdn.com/imgextra/i1/917298378/O1CN01M5YjWo2BlB0mF5rQu_!!917298378.png',
   iconfontUrl: '',
 };
 

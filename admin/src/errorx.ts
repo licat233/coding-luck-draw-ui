@@ -142,7 +142,7 @@ export function verifyTokenExp(): string | null {
   if (token) {
     try {
       const jwt: API.JwtToken = JSON.parse(token);
-      const expTime = new Date(jwt.expire);
+      const expTime = new Date(jwt.access_expire);
       if (expTime < new Date()) {
         return '登录已经过期，请重新登录';
       }
