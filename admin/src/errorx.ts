@@ -41,7 +41,11 @@ export interface ErrorRespStruct {
 // 请求成功发出且服务器也响应了状态码，但http原生状态代码超出了 2xx 的范围
 export function RespStatusError(error: any): void {
   if (error.response) {
-    message.error('None response! Please retry.');
+    if (error.response.status === 401) {
+      message.warn('登录已过期，请重新登录')
+    } else {
+      message.error(error.message);
+    }
     throw error;
   }
 }
@@ -49,6 +53,10 @@ export function RespStatusError(error: any): void {
 
 //ServerErrorHandler 服务器错误
 export function ServerErrorHandler(error: any): void {
+  if (error.message) {
+    message.error(error.message);
+    return
+  }
   if (!error.response) {
     message.error('None response! Please retry.');
     // notification.error({
@@ -111,7 +119,7 @@ export function LogicErrorHandler(error: any): void {
     if (errorInfo) {
       const { errorMessage, showType, traceMessage } = errorInfo;
       showError(errorMessage, showType, traceMessage)
-    }else{
+    } else {
       notification.error({
         description: error.message,
         message: "未知错误",
@@ -157,7 +165,7 @@ export function verifyTokenExp(): string | null {
 }
 
 function showError(errorMessage: string | undefined, showType: ErrorShowType | undefined, traceMessage: string | undefined = undefined) {
-  if (traceMessage){
+  if (traceMessage) {
     notification.error({
       message: errorMessage,
       description: traceMessage,
@@ -209,6 +217,7 @@ export function errorxHandler(error: any) {
   // 请求已经成功发起，但没有收到响应
   // \`error.request\` 在浏览器中是 XMLHttpRequest 的实例，
   // 而在node.js中是 http.ClientRequest 的实例
+  //如果有错误提示，则是业务错误
   //服务器错误,请求已经成功发起，但没有收到响应
   ServerErrorHandler(error)
   // 发送请求时出了点问题

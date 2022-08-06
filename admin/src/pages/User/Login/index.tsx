@@ -1,9 +1,8 @@
 import Footer from '@/components/Footer';
-import { login, loginByEmail } from '@/services/global-api/admin-custom';
+import { login, loginByEmail, loginEmailCaptcha } from '@/services/global-api/admin-custom';
 import { LoginReq, LoginByEmailReq } from '@/services/global-api/adminComponents';
 import { CaptchaInfo, CaptchaReq, EmailCaptchaResp } from '@/services/global-api/captchaComponents';
 import { mathCaptcha } from '@/services/global-api/captcha-custom';
-import { emailCaptcha } from '@/services/global-api/captcha-custom';
 import {
   LockOutlined,
   MailOutlined,
@@ -44,6 +43,7 @@ const Login: React.FC = () => {
   const [imgCaptcha, setImgCaptcha] = useState<CaptchaInfo>({ captcha_id: "", base64_image: "" });
   const [emailCaptchaInfo, setEmailCaptchaInfo] = useState<EmailCaptchaResp>({ captcha_id: "", expires_at: 0 });
   const [form] = useForm()
+  const [emailCaptchaInputState, setEmailCaptchaInputState] = useState(true)
 
   const fetchUserInfo = async () => {
     const userInfo = await initialState?.fetchUserInfo?.();
@@ -79,7 +79,7 @@ const Login: React.FC = () => {
       getCaptchaImage();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [imgCaptcha]);
+  }, [imgCaptcha.base64_image]);
 
   const handleSubmit = async (values: Record<string, any>) => {
     try {
@@ -277,6 +277,7 @@ const Login: React.FC = () => {
                 captchaProps={{
                   size: 'large',
                 }}
+                disabled={emailCaptchaInputState}
                 placeholder={'请输入验证码！'}
                 captchaTextRender={(timing, count) => {
                   if (timing) {
@@ -285,6 +286,7 @@ const Login: React.FC = () => {
 
                   return '获取验证码';
                 }}
+
                 allowClear={true}
                 name="email_solution"
                 rules={[
@@ -300,23 +302,20 @@ const Login: React.FC = () => {
                     message.warn("请输入登录邮箱")
                     return
                   }
-                  const result = await emailCaptcha({
-                    email,
-                    captcha_id: imgCaptcha.captcha_id,
-                    solution
-                  });
 
-                  if (!result.success) {
-                    message.error(result.errorMessage)
-                    return;
-                  }
                   try {
+                    const result = await loginEmailCaptcha({
+                      email,
+                      captcha_id: imgCaptcha.captcha_id,
+                      solution
+                    });
                     setEmailCaptchaInfo(result.data as EmailCaptchaResp)
-                  } catch (error) {
-                    message.error("获取服务器返回数据异常")
-                    return
+                    message.success(`验证码已发送到邮箱:${email}`)
+                    setEmailCaptchaInputState(false)
+                  } catch (error: any) {
+                    getCaptchaImage();
+                    throw error
                   }
-                  message.success(`验证码已发送到邮箱:${email}`)
                 }}
               />
             </>
