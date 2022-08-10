@@ -1,3 +1,4 @@
+import { AxiosError } from '@umijs/max';
 import { message, notification } from 'antd';
 
 const codeMessage = {
@@ -77,71 +78,72 @@ function showError(errorMessage: string | undefined, showType: ErrorShowType | u
 
 
 /**
- * 自定义错误处理
- * 错误情况分析：
- * ① 本地网络错误，无法访问服务器：name: "AxiosError"，code: "ERR_NETWORK"
- * ② 发起请求时，本地校验token exp后abort请求：name: "AbortError"
- * ③ 服务器响应状态码非200：name: "AxiosError"，code: "ERR_BAD_REQUEST"
- * ④ 服务器响应状态码200，但success为false：name: "BizError"，message: "请求失败"
- * ⑤ 服务器响应状态码200，但没有response.body
- * ⑥ 服务器响应状态码200，但response.body不符合errorStruct规范
+ * @name 请求错误处理
+ * @desc 自定义错误处理
+ * @doc 错误情况分析：
+ * @case 本地网络错误，无法访问服务器：name: "AxiosError"，code: "ERR_NETWORK"；
+ * @case 发起请求时，本地校验token exp后abort请求：name: "AbortError"；
+ * @case 服务器响应状态码非200，不当请求引起错误：name: "AxiosError"，code: "ERR_BAD_REQUEST"；
+ * @case 服务器响应状态码非200，服务器内部错误：name: "AxiosError"，code: "ERR_BAD_RESPONSE"；
+ * @case 服务器响应状态码200，但success为false：name: "BizError"，message: "请求失败"；
+ * @case 服务器响应状态码200，但没有response.body；
+ * @case 服务器响应状态码200，但response.body不符合errorStruct规范；
+ * @case 其它未知错误
  */
-
-function RequestErrorHandler(error: any, opts: any) {
+function RequestErrorHandler(error: any, opts: any): void {
   if (opts?.skipErrorHandler) throw error;
-  //case：①
-  if (error?.name === "AxiosError" && error?.code === "ERR_NETWORK") {
-    message.error("无网络！")
-    throw error
-  }
-  //case：②
-  if (error?.name === "AbortError") {
-    message.error("网络请求被终止")
-    throw error
-  }
-  //case：③
-  if (error?.name === "AxiosError" && error?.code === "ERR_BAD_REQUEST") {
-    message.error("服务器响应失败")
-    console.log(error)
-    throw error
-  }
-  //case：④
-  if (error?.name === "BizError") {
-    if (!error?.info?.errorCode) {
-      message.error("请求失败")
-      throw error
-    }
-    const info: ResponseErrorStruct = error.info
-    if (!info.errorCode) {
-      message.error(codeMessage[0])
-      throw error
-    }
-    const errorMessage = info.errorMessage || codeMessage[info.errorCode];
-    if (!errorMessage) {
+  // console.log(error)
+  switch (error?.name) {
+    //发起请求后产生的非200错误
+    case "AxiosError":
+      const info = error as unknown as AxiosError
+      if (info.response?.status === 401) {
+        message.warn("无访问权限，请先登录")
+        break;
+      }
+      //如果存在http status，就提示一下
+      if (info.response?.status && info.response?.statusText) {
+        message.error(info.response.status + ":" + info.response.statusText)
+      }
       notification.error({
-        message: "未知错误",
-        description: error.message,
+        message: info.code,
+        description: info.message,
+        placement: 'bottomRight',
+      });
+      break;
+    //未发起请求，产生的终止错误
+    case "AbortError":
+      message.error("请求被终止")
+      break;
+    //发起请求后，产生的200错误
+    case "BizError":
+      const details = error.info as unknown as ResponseErrorStruct
+      if (typeof details.errorCode === 'undefined') {
+        message.error("请求失败，服务器未返回具体错误代码errorCode")
+        break;
+      }
+      // if (details.errorCode === 401){
+      //   message.warn("授权已失效，请重新登录");
+      //   break
+      // }
+      const errorMessage = details.errorMessage || codeMessage[details.errorCode];
+      if (!errorMessage) {
+        notification.error({
+          message: "未知错误",
+          description: error.message,
+        })
+        break;
+      }
+      showError(errorMessage, details.showType, details.traceMessage)
+      break;
+    //其它错误
+    default:
+      notification.error({
+        message: "请求失败",
+        description: "未知的错误: " + error?.message
       })
-      throw error
-    }
-    showError(errorMessage, error.info.showType, error.info.traceMessage)
-    throw error
+      break;
   }
-  //case：⑤
-  if (!error.response) {
-    message.error("无响应数据")
-    throw error
-  }
-  //case：⑥
-  if (typeof error.success === 'undefined') {
-    message.error("后端响应格式错误")
-    throw error
-  }
-  //其它未知的错误
-  notification.error({
-    message: "请求失败",
-    description: "未知的错误: " + error?.message
-  })
   throw error
 }
 

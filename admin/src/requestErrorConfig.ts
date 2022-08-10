@@ -36,14 +36,14 @@ export const errorConfig: RequestConfig = {
       if (!success) {
         const error: any = new Error(errorMessage);
         error.name = 'BizError';
-        error.info = { errorCode, errorMessage, showType, data, traceMessage };
+        error.info = { success, errorCode, errorMessage, showType, data, traceMessage };
         throw error; // 抛出自制的错误
       }
     },
     // 错误接收及处理
     errorHandler: (error: any, opts: any) => {
       // if (opts?.skipErrorHandler) throw error;
-      RequestErrorHandler(error,opts);
+      RequestErrorHandler(error, opts);
     },
   },
 
