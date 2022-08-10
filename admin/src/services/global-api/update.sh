@@ -44,30 +44,44 @@ for name in ${names[@]}; do
   echo "update ${filename} successfully"
 done
 
-#需要更新的 RESTful 方法: list info add put del
+# 修改admin-custom.ts文件内的 RESTful 方法: list info add put del
 #逻辑：查找指定方法名，获取其位置行数，查找下一行 admin/:name/ 后面的名字name，更改方法名为：name方法名
 FILENAME="admin-custom.ts"
 FUNC_ARR=("list" "info" "add" "put" "del")
 for FUNC_NAME in ${FUNC_ARR[@]}; do
-  N=7
-  if [ $FUNC_NAME = "list" ]; then
-    N=15
-  fi
   for line in $(grep -n "function ${FUNC_NAME}(" $FILENAME | cut -d ":" -f 1); do
     NEXT_LINE=$(($line + 1))
     NEXT_STR=$(sed -n $(expr ${NEXT_LINE}p) $FILENAME)
     NEXT_LEN=$(echo ${#NEXT_STR})
     START_INDEX=$(echo $(awk -v a="$NEXT_STR" -v b="admin/" 'BEGIN{print index(a,b)}'))
     let START_INDEX+=5
-    LAST=$(($NEXT_LEN - $START_INDEX))
-    END_INDEX=$(($LAST - $N))
-    NAME=${NEXT_STR:START_INDEX:END_INDEX}
+    last_str=${NEXT_STR:START_INDEX:NEXT_LEN}
+    search1_index=$(echo $(awk -v a="$last_str" -v b="\"" 'BEGIN{print index(a,b)}'))
+    search2_index=$(echo $(awk -v a="$last_str" -v b="/" 'BEGIN{print index(a,b)}'))
+    if (($search2_index < $search1_index && $search2_index > 0)); then
+      search_index=$search2_index
+    else
+      search_index=$search1_index
+    fi
+    let search_index--
+    if (($search_index < 0)); then
+      echo "panic：search_index < 0；search_index = ${search_index}"
+      exit
+    fi
+    target_name=${last_str:0:search_index}
+    # echo $target_name
+    if [ -z $target_name ]; then
+      continue
+    fi
+    # LAST=$(($NEXT_LEN - $START_INDEX))
+    # END_INDEX=$(($LAST - $N))
+    # NAME=${NEXT_STR:START_INDEX:END_INDEX}
     LINE_STR=$(sed -n $(expr ${line}p) $FILENAME)
     firstLetter=${FUNC_NAME:0:1}
     otherLetter=${FUNC_NAME:1}
     firstLetter=$(echo $firstLetter | tr '[:lower:]' '[:upper:]')
     UP_FUNC_NAME=$firstLetter$otherLetter
-    NEW_NAME="${NAME}${UP_FUNC_NAME}"
+    NEW_NAME="${target_name}${UP_FUNC_NAME}"
     NEW_LINE_STR=$(echo ${LINE_STR/$FUNC_NAME/$NEW_NAME})
     LINE_STR=$(echo $LINE_STR | sed -e 's/[]\/$*.^[]/\\&/g')
     sed -i "" "${line}s/$LINE_STR/$NEW_LINE_STR/" $FILENAME

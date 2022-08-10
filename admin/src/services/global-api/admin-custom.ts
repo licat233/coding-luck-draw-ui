@@ -58,10 +58,10 @@ export function currentUser(options?: { [key: string]: any }) {
 
 /**
  * @description "获取活动列表"
- * @param params
+ * @param req
  */
-export function activityList(params: components.ListReqParams, options?: { [key: string]: any }) {
-	return webapi.get<components.BaseResp>("/v1/api/admin/activity/list", params, options)
+export function activityList(req: components.ListReq, options?: { [key: string]: any }) {
+	return webapi.get<components.BaseResp>("/v1/api/admin/activity/list", req, options)
 }
 
 /**
@@ -98,10 +98,10 @@ export function activityDel(req: components.ActivityDelReq, options?: { [key: st
 
 /**
  * @description "获取管理员列表"
- * @param params
+ * @param req
  */
-export function adminerList(params: components.ListReqParams, options?: { [key: string]: any }) {
-	return webapi.get<components.BaseResp>("/v1/api/admin/adminer/list", params, options)
+export function adminerList(req: components.ListReq, options?: { [key: string]: any }) {
+	return webapi.get<components.BaseResp>("/v1/api/admin/adminer/list", req, options)
 }
 
 /**
@@ -146,10 +146,10 @@ export function modify(req: components.AdminerModifyReq, options?: { [key: strin
 
 /**
  * @description "获取抽奖者列表"
- * @param params
+ * @param req
  */
-export function luckerList(params: components.ListReqParams, options?: { [key: string]: any }) {
-	return webapi.get<components.BaseResp>("/v1/api/admin/lucker/list", params, options)
+export function luckerList(req: components.ListReq, options?: { [key: string]: any }) {
+	return webapi.get<components.BaseResp>("/v1/api/admin/lucker/list", req, options)
 }
 
 /**
@@ -186,10 +186,10 @@ export function luckerDel(req: components.LuckerDelReq, options?: { [key: string
 
 /**
  * @description "获取奖品列表"
- * @param params
+ * @param req
  */
-export function prizeList(params: components.ListReqParams, options?: { [key: string]: any }) {
-	return webapi.get<components.BaseResp>("/v1/api/admin/prize/list", params, options)
+export function prizeList(req: components.ListReq, options?: { [key: string]: any }) {
+	return webapi.get<components.BaseResp>("/v1/api/admin/prize/list", req, options)
 }
 
 /**
@@ -226,10 +226,10 @@ export function prizeDel(req: components.PrizeDelReq, options?: { [key: string]:
 
 /**
  * @description "获取奖品池列表"
- * @param params
+ * @param req
  */
-export function PrizesPoolList(params: components.ListReqParams, options?: { [key: string]: any }) {
-	return webapi.get<components.BaseResp>("/v1/api/admin/PrizesPool/list", params, options)
+export function PrizesPoolList(req: components.ListReq, options?: { [key: string]: any }) {
+	return webapi.get<components.BaseResp>("/v1/api/admin/PrizesPool/list", req, options)
 }
 
 /**
@@ -266,10 +266,10 @@ export function PrizesPoolDel(req: components.PrizesPoolDelReq, options?: { [key
 
 /**
  * @description "获取项目列表"
- * @param params
+ * @param req
  */
-export function projectList(params: components.ListReqParams, options?: { [key: string]: any }) {
-	return webapi.get<components.BaseResp>("/v1/api/admin/project/list", params, options)
+export function projectList(req: components.ListReq, options?: { [key: string]: any }) {
+	return webapi.get<components.BaseResp>("/v1/api/admin/project/list", req, options)
 }
 
 /**
@@ -407,10 +407,10 @@ export function getPermissionsForUserInDomain(req: components.RoleAndDomainReq, 
 
 /**
  * @description "获取用户列表"
- * @param params
+ * @param req
  */
-export function userList(params: components.ListReqParams, options?: { [key: string]: any }) {
-	return webapi.get<components.BaseResp>("/v1/api/admin/user/list", params, options)
+export function userList(req: components.ListReq, options?: { [key: string]: any }) {
+	return webapi.get<components.BaseResp>("/v1/api/admin/user/list", req, options)
 }
 
 /**
@@ -447,10 +447,10 @@ export function userDel(req: components.UserDelReq, options?: { [key: string]: a
 
 /**
  * @description "获取用户池列表"
- * @param params
+ * @param req
  */
-export function usersPoolList(params: components.ListReqParams, options?: { [key: string]: any }) {
-	return webapi.get<components.BaseResp>("/v1/api/admin/usersPool/list", params, options)
+export function usersPoolList(req: components.ListReq, options?: { [key: string]: any }) {
+	return webapi.get<components.BaseResp>("/v1/api/admin/usersPool/list", req, options)
 }
 
 /**

@@ -18,6 +18,7 @@ import React, { useRef, useState } from 'react';
 import UpdateForm from './components/UpdateForm';
 import { Adminer, AdminerAddReq, AdminerPutReq, AdminerDelReq } from "@/services/global-api/adminComponents";
 
+
 /**
  * @en-US Add node
  * @zh-CN 添加节点
@@ -59,21 +60,20 @@ const handleUpdate = async (fields: AdminerPutReq) => {
     return false;
   }
 };
+
 /**
  *  Delete node
  * @zh-CN 删除节点
  *
- * @param selectedRows
+ * @param selectedRow
  */
 
-const handleRemove = async (selectedRows: AdminerDelReq[]) => {
+const handleRemove = async (selectedRow: AdminerDelReq) => {
   const hide = message.loading('正在删除');
-  if (!selectedRows) return true;
+  if (!selectedRow) return true;
 
   try {
-    await adminerDel({
-      key: selectedRows.map((row) => row.key),
-    });
+    await adminerDel(selectedRow);
     hide();
     message.success('Deleted successfully and will refresh soon');
     return true;
@@ -197,6 +197,7 @@ const AdminerList: React.FC = () => {
       ],
     },
   ];
+
   return (
     <PageContainer>
       <ProTable<Adminer, API.PageParams>
