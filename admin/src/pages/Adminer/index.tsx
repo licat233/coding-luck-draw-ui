@@ -1,7 +1,7 @@
 // import { addRule, removeRule, rule, updateRule } from '@/services/ant-design-pro/api';
 import { adminerAdd, adminerDel, adminerList, adminerPut } from '@/services/global-api/admin-custom';
-import { PlusOutlined } from '@ant-design/icons';
-import type { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
+import { DownOutlined, PlusOutlined } from '@ant-design/icons';
+import { ActionType, ProColumns, ProDescriptionsItemProps } from '@ant-design/pro-components';
 import {
   FooterToolbar,
   ModalForm,
@@ -12,12 +12,17 @@ import {
   ProTable,
 } from '@ant-design/pro-components';
 import '@umijs/max';
-import { Button, Drawer, Input, message } from 'antd';
+import { Button, Drawer, Dropdown, Modal, Menu, message, Radio, Input } from 'antd';
 import React, { useRef, useState } from 'react';
+import { useRequest } from 'umi';
 // import type { FormValueType } from './components/UpdateForm';
 import UpdateForm from './components/UpdateForm';
 import { Adminer, AdminerAddReq, AdminerPutReq, AdminerDelReq } from "@/services/global-api/adminComponents";
+import styles from './style.less';
 
+const RadioButton = Radio.Button;
+const RadioGroup = Radio.Group;
+const { Search } = Input;
 
 /**
  * @en-US Add node
@@ -68,12 +73,12 @@ const handleUpdate = async (fields: AdminerPutReq) => {
  * @param selectedRow
  */
 
-const handleRemove = async (selectedRow: AdminerDelReq) => {
+const handleRemove = async (id: number) => {
   const hide = message.loading('正在删除');
-  if (!selectedRow) return true;
+  if (typeof id === 'undefined') return true;
 
   try {
-    await adminerDel(selectedRow);
+    await adminerDel({ id });
     hide();
     message.success('Deleted successfully and will refresh soon');
     return true;
@@ -83,6 +88,8 @@ const handleRemove = async (selectedRow: AdminerDelReq) => {
     return false;
   }
 };
+
+
 
 const AdminerList: React.FC = () => {
   /**
@@ -98,23 +105,39 @@ const AdminerList: React.FC = () => {
   const [updateModalVisible, handleUpdateModalVisible] = useState<boolean>(false);
   const [showDetail, setShowDetail] = useState<boolean>(false);
   const actionRef = useRef<ActionType>();
-  const [currentRow, setCurrentRow] = useState<Adminer>();
-  const [selectedRowsState, setSelectedRows] = useState<Adminer[]>([]);
+
+  const [done, setDone] = useState<boolean>(false);
+  const [visible, setVisible] = useState<boolean>(false);
+  const [current, setCurrent] = useState<Adminer>();
+
   /**
    * @en-US International configuration
    * @zh-CN 国际化配置
    * */
 
+
+  const defaultAvatar = "https://gw.alipayobjects.com/zos/antfincdn/XAosXuNZyF/BiazfanxmamNRoxxVxka.png";
+
   const columns: ProColumns<Adminer>[] = [
     {
-      title: '规则名称',
+      title: '头像',
+      dataIndex: 'avatar',
+      valueType: "avatar",
+      width: 50,
+      hideInSearch: true,
+      renderText: (_, record) => {
+        return record.avatar || defaultAvatar;
+      }
+    },
+    {
+      title: '管理员名称',
       dataIndex: 'name',
-      tip: 'The rule name is the unique key',
+      // tip: 'The adminer uuid is the unique key',
       render: (dom, entity) => {
         return (
           <a
             onClick={() => {
-              setCurrentRow(entity);
+              setCurrent(entity);
               setShowDetail(true);
             }}
           >
@@ -124,58 +147,69 @@ const AdminerList: React.FC = () => {
       },
     },
     {
-      title: '描述',
-      dataIndex: 'desc',
-      valueType: 'textarea',
+      title: '账号',
+      dataIndex: 'passport',
+      valueType: 'text',
     },
     {
-      title: '服务调用次数',
-      dataIndex: 'callNo',
-      sorter: true,
-      hideInForm: true,
-      renderText: (val: string) => `${val}${'万'}`,
+      title: '邮箱',
+      dataIndex: 'email',
+      valueType: 'text',
     },
+    // {
+    //   title: '服务调用次数',
+    //   dataIndex: 'email',
+    //   sorter: true,
+    //   hideInForm: true,
+    //   renderText: (val: string) => `${val}${'万'}`,
+    // },
     {
       title: '状态',
       dataIndex: 'status',
       hideInForm: true,
+      sorter: true,
       valueEnum: {
         0: {
           text: '关闭',
-          status: 'Default',
+          status: 'disabled',
         },
         1: {
-          text: '运行中',
-          status: 'Processing',
+          text: '正常',
+          status: 'normal',
         },
         2: {
-          text: '已上线',
-          status: 'Success',
-        },
-        3: {
-          text: '异常',
-          status: 'Error',
+          text: '审核中',
+          status: 'reviewed',
         },
       },
     },
     {
-      title: '上次调度时间',
+      title: '超管?',
+      dataIndex: 'is_super_admin',
+      hideInForm: true,
       sorter: true,
-      dataIndex: 'updatedAt',
-      valueType: 'dateTime',
-      renderFormItem: (item, { defaultRender, ...rest }, form) => {
-        const status = form.getFieldValue('status');
-
-        if (`${status}` === '0') {
-          return false;
-        }
-
-        if (`${status}` === '3') {
-          return <Input {...rest} placeholder={'请输入异常原因！'} />;
-        }
-
-        return defaultRender(item);
+      valueEnum: {
+        0: {
+          text: '否',
+          status: 'disabled',
+        },
+        1: {
+          text: '是',
+          status: 'normal',
+        },
       },
+    },
+    {
+      title: '登录次数',
+      dataIndex: 'login_count',
+      sorter: true,
+      hideInForm: true,
+    },
+    {
+      title: '上次登录时间',
+      sorter: true,
+      dataIndex: 'last_login',
+      valueType: 'dateTime',
     },
     {
       title: '操作',
@@ -186,22 +220,97 @@ const AdminerList: React.FC = () => {
           key="config"
           onClick={() => {
             handleUpdateModalVisible(true);
-            setCurrentRow(record);
+            setCurrent(record);
           }}
         >
-          配置
+          编辑
         </a>,
-        <a key="subscribeAlert" href="https://procomponents.ant.design/">
-          订阅警报
-        </a>,
+        <MoreBtn key="more" item={record} />,
       ],
     },
   ];
 
+  const MoreBtn: React.FC<{
+    item: Adminer;
+  }> = ({ item }) => (
+    <Dropdown
+      overlay={
+        <Menu onClick={({ key }) => editAndDelete(key, item)}>
+          <Menu.Item key="edit">编辑</Menu.Item>
+          <Menu.Item key="delete">删除</Menu.Item>
+        </Menu>
+      }
+    >
+      <a>
+        更多 <DownOutlined />
+      </a>
+    </Dropdown>
+  );
+
+
+  const {
+    data: listData,
+    loading,
+    mutate,
+  } = useRequest(() => {
+    return adminerList({
+      pageSize: 20,
+      current: 1,
+    });
+  });
+
+  const { run: postRun } = useRequest(
+    (method, params) => {
+      if (method === 'remove') {
+        return handleRemove(params);
+      }
+      if (method === 'update') {
+        return handleUpdate(params);
+      }
+      return handleAdd(params);
+    },
+    {
+      manual: true,
+      onSuccess: (result) => {
+        mutate(result);
+      },
+    },
+  );
+
+  const showEditModal = (item: Adminer) => {
+    setVisible(true);
+    setCurrent(item);
+  };
+
+  const editAndDelete = (key: string | number, currentItem: Adminer) => {
+    if (key === 'edit') showEditModal(currentItem);
+    else if (key === 'delete') {
+      Modal.confirm({
+        title: '删除管理员',
+        content: '确定删除该管理员吗？',
+        okText: '确认',
+        cancelText: '取消',
+        onOk: () => handleRemove(currentItem.id),
+      });
+    }
+  };
+
+  const handleDone = () => {
+    setDone(false);
+    setVisible(false);
+    setCurrent(undefined);
+  };
+
+  const handleSubmit = (values: Adminer) => {
+    setDone(true);
+    const method = values?.id ? 'update' : 'add';
+    postRun(method, values);
+  };
+
   return (
     <PageContainer>
       <ProTable<Adminer, API.PageParams>
-        headerTitle={'查询表格'}
+        headerTitle={'管理员列表'}
         actionRef={actionRef}
         rowKey="key"
         search={{
@@ -220,45 +329,14 @@ const AdminerList: React.FC = () => {
         ]}
         request={adminerList}
         columns={columns}
-        rowSelection={{
-          onChange: (_, selectedRows) => {
-            setSelectedRows(selectedRows);
-          },
-        }}
+      // rowSelection={{
+      //   onChange: (_, selectedRows) => {
+      //     setSelectedRows(selectedRows);
+      //   },
+      // }}
       />
-      {selectedRowsState?.length > 0 && (
-        <FooterToolbar
-          extra={
-            <div>
-              已选择{' '}
-              <a
-                style={{
-                  fontWeight: 600,
-                }}
-              >
-                {selectedRowsState.length}
-              </a>{' '}
-              项 &nbsp;&nbsp;
-              <span>
-                服务调用次数总计 {selectedRowsState.reduce((pre, item) => pre + item.callNo!, 0)} 万
-              </span>
-            </div>
-          }
-        >
-          <Button
-            onClick={async () => {
-              await handleRemove(selectedRowsState);
-              setSelectedRows([]);
-              actionRef.current?.reloadAndRest?.();
-            }}
-          >
-            批量删除
-          </Button>
-          <Button type="primary">批量审批</Button>
-        </FooterToolbar>
-      )}
       <ModalForm
-        title={'新建规则'}
+        title={'新建管理员'}
         width="400px"
         visible={createModalVisible}
         onVisibleChange={handleModalVisible}
@@ -278,7 +356,7 @@ const AdminerList: React.FC = () => {
           rules={[
             {
               required: true,
-              message: '规则名称为必填项',
+              message: '管理员名称为必填项',
             },
           ]}
           width="md"
@@ -292,7 +370,7 @@ const AdminerList: React.FC = () => {
 
           if (success) {
             handleUpdateModalVisible(false);
-            setCurrentRow(undefined);
+            setCurrent(undefined);
 
             if (actionRef.current) {
               actionRef.current.reload();
@@ -303,31 +381,31 @@ const AdminerList: React.FC = () => {
           handleUpdateModalVisible(false);
 
           if (!showDetail) {
-            setCurrentRow(undefined);
+            setCurrent(undefined);
           }
         }}
         updateModalVisible={updateModalVisible}
-        values={currentRow || {}}
+        values={current}
       />
 
       <Drawer
         width={600}
         visible={showDetail}
         onClose={() => {
-          setCurrentRow(undefined);
+          setCurrent(undefined);
           setShowDetail(false);
         }}
         closable={false}
       >
-        {currentRow?.name && (
+        {current?.name && (
           <ProDescriptions<Adminer>
             column={2}
-            title={currentRow?.name}
+            title={current?.name}
             request={async () => ({
-              data: currentRow || {},
+              data: current || {},
             })}
             params={{
-              id: currentRow?.name,
+              id: current?.name,
             }}
             columns={columns as ProDescriptionsItemProps<Adminer>[]}
           />

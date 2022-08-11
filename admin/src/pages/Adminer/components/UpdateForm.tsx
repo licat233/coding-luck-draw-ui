@@ -1,28 +1,18 @@
+import React from 'react';
+import { Modal } from 'antd';
 import {
-  ProFormDateTimePicker,
-  ProFormRadio,
   ProFormSelect,
   ProFormText,
-  ProFormTextArea,
   StepsForm,
-} from '@ant-design/pro-components';
-import '@umijs/max';
-import { Modal } from 'antd';
-import React from 'react';
-import { Adminer, AdminerPutReq } from "@/services/global-api/adminComponents";
+} from '@ant-design/pro-form';
+import { Adminer, AdminerPutReq } from '@/services/global-api/admin-custom';
+import { ProFormUploadDragger } from '@ant-design/pro-components';
 
-export type FormValueType = {
-  target?: string;
-  template?: string;
-  type?: string;
-  time?: string;
-  frequency?: string;
-} & Partial<AdminerPutReq>;
 export type UpdateFormProps = {
   onCancel: (flag?: boolean, formVals?: AdminerPutReq) => void;
-  onSubmit: (values: AdminerPutReq) => Promise<void>;
+  onSubmit: (values: AdminerPutReq) => Promise<void>
   updateModalVisible: boolean;
-  values: Partial<Adminer>;
+  values: Adminer | undefined;
 };
 
 const UpdateForm: React.FC<UpdateFormProps> = (props) => {
@@ -39,7 +29,7 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
               padding: '32px 40px 48px',
             }}
             destroyOnClose
-            title={'规则配置'}
+            title="管理员配置"
             visible={props.updateModalVisible}
             footer={submitter}
             onCancel={() => {
@@ -54,102 +44,70 @@ const UpdateForm: React.FC<UpdateFormProps> = (props) => {
     >
       <StepsForm.StepForm
         initialValues={{
-          name: props.values.name,
-          desc: props.values.desc,
+          ...props.values
         }}
-        title={'基本信息'}
+        title="基本信息"
       >
+        <ProFormUploadDragger
+          name="avatar"
+          action="upload.do"
+          value={[{ uid: props?.values?.uuid || "-1", name: `avatar_${props?.values?.uuid || -1}.png`, status: 'done', url: props?.values?.avatar }]}
+        />
         <ProFormText
+          rules={[
+            {
+              required: true,
+              message: '管理员名称为必填项',
+            },
+          ]}
+          placeholder="请输入管理员名称"
+          width="md"
           name="name"
-          label={'规则名称'}
-          width="md"
+        />
+        <ProFormText
           rules={[
             {
               required: true,
-              message: '请输入规则名称！',
+              message: '账号为必填项',
             },
           ]}
-        />
-        <ProFormTextArea
-          name="desc"
+          placeholder="请输入账号"
           width="md"
-          label={'规则描述'}
-          placeholder={'请输入至少五个字符'}
+          name="passport"
+        />
+        <ProFormText
           rules={[
             {
               required: true,
-              message: '请输入至少五个字符的规则描述！',
-              min: 5,
+              message: '密码为必填项',
             },
           ]}
-        />
-      </StepsForm.StepForm>
-      <StepsForm.StepForm
-        initialValues={{
-          target: '0',
-          template: '0',
-        }}
-        title={'配置规则属性'}
-      >
-        <ProFormSelect
-          name="target"
+          placeholder="请输入密码"
           width="md"
-          label={'监控对象'}
-          valueEnum={{
-            0: '表一',
-            1: '表二',
-          }}
+          name="password"
         />
-        <ProFormSelect
-          name="template"
-          width="md"
-          label={'规则模板'}
-          valueEnum={{
-            0: '规则模板一',
-            1: '规则模板二',
-          }}
-        />
-        <ProFormRadio.Group
-          name="type"
-          label={'规则类型'}
-          options={[
-            {
-              value: '0',
-              label: '强',
-            },
-            {
-              value: '1',
-              label: '弱',
-            },
-          ]}
-        />
-      </StepsForm.StepForm>
-      <StepsForm.StepForm
-        initialValues={{
-          type: '1',
-          frequency: 'month',
-        }}
-        title={'设定调度周期'}
-      >
-        <ProFormDateTimePicker
-          name="time"
-          width="md"
-          label={'开始时间'}
+        <ProFormText
           rules={[
             {
               required: true,
-              message: '请选择开始时间！',
+              message: '邮箱为必填项',
             },
           ]}
+          placeholder="请输入邮箱"
+          width="md"
+          name="email"
         />
         <ProFormSelect
-          name="frequency"
-          label={'监控对象'}
+          placeholder="请选择账户状态"
+          options={[{ label: "关闭", value: 0 }, { label: "开启", value: 1 }]}
           width="md"
-          valueEnum={{
-            month: '月',
-            week: '周',
-          }}
+          name="status"
+        />
+        <ProFormSelect
+          placeholder="是否为超级管理员"
+          options={[{ label: "否", value: 0 }, { label: "是", value: 1 }]}
+          width="md"
+          name="is_super_admin"
         />
       </StepsForm.StepForm>
     </StepsForm>
