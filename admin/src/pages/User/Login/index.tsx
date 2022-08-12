@@ -194,6 +194,7 @@ const Login: React.FC = () => {
               <Input.Group compact className={styles.captchagrounp}>
                 <div className={styles.captchainput}>
                   <ProFormText
+                    key="account_solution"
                     name="solution"
                     fieldProps={{
                       size: 'large',
@@ -245,6 +246,7 @@ const Login: React.FC = () => {
               <Input.Group compact className={styles.captchagrounp}>
                 <div className={styles.captchainput}>
                   <ProFormText
+                    key="email_solution"
                     name="solution"
                     fieldProps={{
                       size: 'large',

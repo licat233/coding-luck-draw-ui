@@ -22,10 +22,15 @@ const loginOut = async () => {
   try {
     const resp = await logout();
     if (!resp.success) {
-      return
+      if (resp.errorCode !== 401){
+        message.error(resp.errorMessage)
+        return
+      }
     }
   } catch (error) {
-    return
+    if ((error as any)?.response?.status !== 401){
+      return
+    }
   }
 
   localStorage.removeItem("jwtToken")
